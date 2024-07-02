@@ -78,6 +78,7 @@ module Rouge
         rule %r/\$(([1-9]\d*)?\d)/, Name::Variable
         rule %r/\$#{id}/, Name
 
+        rule %r/(::|<=>)/, Operator
         rule %r{[()\[\]{}:;,?\\]}, Punctuation
         rule %r([-/=+*%<>!&|^.~]+), Operator
         rule %r/"/, Str, :dq
@@ -91,6 +92,14 @@ module Rouge
 
         rule %r/@#{id}/, Keyword::Declaration
         rule %r/##{id}/, Keyword
+
+        rule %r/(?!\b(if|while|for)\b)\b#{id}(?=(\?|!)?\s*[(])/ do |m|
+          if m[0] =~ /^[[:upper:]]/
+            token Keyword::Type
+          else
+            token Name::Function
+          end
+        end
 
         rule id do |m|
           if keywords.include? m[0]

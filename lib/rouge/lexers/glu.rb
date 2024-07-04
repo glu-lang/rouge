@@ -78,6 +78,10 @@ module Rouge
         rule %r/\$(([1-9]\d*)?\d)/, Name::Variable
         rule %r/\$#{id}/, Name
 
+        rule %r/(\.)(#{id})/ do |m|
+          groups Operator, Name::Variable
+        end
+
         rule %r/(::|<=>)/, Operator
         rule %r{[()\[\]{}:;,?\\]}, Punctuation
         rule %r([-/=+*%<>!&|^.~]+), Operator
@@ -93,9 +97,15 @@ module Rouge
         rule %r/@#{id}/, Keyword::Declaration
         rule %r/##{id}/, Keyword
 
+        rule %r/#{id}(?=\s*::)/ do |m|
+          token Name::Namespace
+        end
+
         rule %r/(?!\b(if|while|for)\b)\b#{id}(?=(\?|!)?\s*[(])/ do |m|
-          if m[0] =~ /^[[:upper:]]/
-            token Keyword::Type
+          if m[0] =~ /^[[:upper:]][[:upper:]]+$/
+            token Name::Constant
+          elsif m[0] =~ /^[[:upper:]]/
+            token Name::Class
           else
             token Name::Function
           end
@@ -108,8 +118,10 @@ module Rouge
             token Keyword::Declaration
           elsif constants.include? m[0]
             token Keyword::Constant
+          elsif m[0] =~ /^[[:upper:]][[:upper:]]+$/
+            token Name::Constant
           elsif m[0] =~ /^[[:upper:]]/
-            token Keyword::Type
+            token Name::Class
           else
             token Name
           end

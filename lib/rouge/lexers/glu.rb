@@ -82,6 +82,14 @@ module Rouge
           groups Operator, Name::Variable
         end
 
+        rule %r/(#{id})\s*(::)/ do |m|
+          groups Name::Namespace, Punctuation
+        end
+
+        rule %r/(#{id})\s*(:)/ do |m|
+          groups Name::Variable, Punctuation
+        end
+
         rule %r/(::|<=>)/, Operator
         rule %r{[()\[\]{}:;,?\\]}, Punctuation
         rule %r([-/=+*%<>!&|^.~]+), Operator
@@ -96,10 +104,6 @@ module Rouge
 
         rule %r/@#{id}/, Keyword::Declaration
         rule %r/##{id}/, Keyword
-
-        rule %r/#{id}(?=\s*::)/ do |m|
-          token Name::Namespace
-        end
 
         rule %r/(?!\b(if|while|for)\b)\b#{id}(?=(\?|!)?\s*[(])/ do |m|
           if m[0] =~ /^[[:upper:]][[:upper:]]+$/

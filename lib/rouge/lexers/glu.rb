@@ -29,7 +29,7 @@ module Rouge
       )
 
       declarations = Set.new %w(
-        enum func struct operator let var
+        enum func struct operator let var typealias
       )
 
       constants = Set.new %w(

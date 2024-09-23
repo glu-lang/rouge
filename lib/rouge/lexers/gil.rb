@@ -3,37 +3,57 @@
 
 module Rouge
   module Lexers
-    class Glu < RegexLexer
-      tag 'glu'
-      filenames '*.glu'
+    class Gil < RegexLexer
+      tag 'gil'
+      filenames '*.gil'
 
-      title "Glu"
-      desc 'The Glu programming language (glu-lang.org)'
+      title "GIL"
+      desc 'The Glu intermediate language (glu-lang.org)'
 
       id_head = /_|(?!\p{Mc})\p{Alpha}|[^\u0000-\uFFFF]/
       id_rest = /[\p{Alnum}_]|[^\u0000-\uFFFF]/
       id = /#{id_head}#{id_rest}*/
 
       keywords = Set.new %w(
-        as
-        break
-        continue
-        else
-        for
-        if
-        import
-        in
-        or
         return
-        while
+        br
+        cond_br
+        unreachable
+
+        integer_literal
+        float_literal
+        string_literal
+        function_ptr
+        enum_variant
+
+        debug
+        call
+
+        cast_int_to_ptr
+        cast_ptr_to_int
+        bitcast
+        int_trunc
+        int_zext
+        int_sext
+        float_trunc
+        float_ext
+
+        alloca
+        load
+        store
+
+        struct_extract
+        struct_create
+        struct_destructure
+
+        struct_field_ptr
+        ptr_offset
+
+        instruction_name
       )
 
       declarations = Set.new %w(
-        enum func struct operator let var typealias
-      )
-
-      constants = Set.new %w(
-        true false
+        import gil enum func struct operator let var arg loc typealias
       )
 
       start do
@@ -75,8 +95,7 @@ module Rouge
       state :root do
         mixin :whitespace
         
-        rule %r/\$(([1-9]\d*)?\d)/, Name::Variable
-        rule %r/\$#{id}/, Name
+        rule %r/\%[A-Za-z0-9]+/, Name::Variable # SSA identifiers
 
         rule %r/(\.)(#{id})/ do |m|
           groups Operator, Name::Variable
@@ -86,13 +105,9 @@ module Rouge
           groups Name::Namespace, Punctuation
         end
 
-        rule %r/(#{id})\s*(:)/ do |m|
-          groups Name::Variable, Punctuation
-        end
-
         rule %r/(::|<=>)/, Operator
         rule %r{[()\[\]{}:;,?\\]}, Punctuation
-        rule %r([-/=+*%<>!&|^.~]+), Operator
+        rule %r([-/=+*%<>!&|^.~@$]+), Operator
         rule %r/"/, Str, :dq
         rule %r/'(\\.|.)'/, Str::Char
         rule %r/(\d+(?:_\d+)*\*|(?:\d+(?:_\d+)*)*\.\d+(?:_\d)*)(e[+-]?\d+(?:_\d)*)?/i, Num::Float
@@ -102,26 +117,13 @@ module Rouge
         rule %r/0b[01]+(?:_[01]+)*/, Num::Bin
         rule %r{[\d]+(?:_\d+)*}, Num::Integer
 
-        rule %r/@#{id}/, Keyword::Declaration
         rule %r/##{id}/, Keyword
-
-        rule %r/(?!\b(if|while|for)\b)\b#{id}(?=(\?|!)?\s*[(])/ do |m|
-          if m[0] =~ /^[[:upper:]][[:upper:]]+$/
-            token Name::Constant
-          elsif m[0] =~ /^[[:upper:]]/
-            token Name::Class
-          else
-            token Name::Function
-          end
-        end
 
         rule id do |m|
           if keywords.include? m[0]
             token Keyword
           elsif declarations.include? m[0]
             token Keyword::Declaration
-          elsif constants.include? m[0]
-            token Keyword::Constant
           elsif m[0] =~ /^[[:upper:]][[:upper:]]+$/
             token Name::Constant
           elsif m[0] =~ /^[[:upper:]]/
@@ -129,10 +131,6 @@ module Rouge
           else
             token Name
           end
-        end
-
-        rule %r/(`)(#{id})(`)/ do
-          groups Punctuation, Name::Variable, Punctuation
         end
       end
 

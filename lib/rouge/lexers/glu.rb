@@ -5,7 +5,8 @@ module Rouge
   module Lexers
     class Glu < RegexLexer
       tag 'glu'
-      filenames '*.glu'
+      aliases 'gil'
+      filenames '*.glu', '*.gil'
 
       title "Glu"
       desc 'The Glu programming language (glu-lang.org)'

@@ -24,6 +24,7 @@ module Rouge
         float_literal
         string_literal
         function_ptr
+        global_ptr
         enum_variant
 
         debug
@@ -37,6 +38,8 @@ module Rouge
         int_sext
         float_trunc
         float_ext
+        float_to_int
+        int_to_float
 
         alloca
         load
@@ -44,11 +47,12 @@ module Rouge
 
         struct_extract
         struct_create
-        struct_destructure
+        array_create
 
         struct_field_ptr
         ptr_offset
 
+        drop
         instruction_name
       )
 

@@ -16,24 +16,26 @@ module Rouge
 
       keywords = Set.new %w(
         as
+        if
+        else
+        while
+        for
+        return
         break
         continue
-        else
-        for
-        if
-        import
         in
-        or
-        return
-        while
+
+        unique
+        shared
       )
 
       declarations = Set.new %w(
-        enum func struct operator let var typealias
+        enum func struct let var typealias
+        union import namespace private public
       )
 
       constants = Set.new %w(
-        true false
+        true false null
       )
 
       start do
